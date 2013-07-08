@@ -76,4 +76,3 @@ fi
 unfunction _plugin__start_agent
 unset _plugin__forwarding
 unset _plugin__ssh_env
-
