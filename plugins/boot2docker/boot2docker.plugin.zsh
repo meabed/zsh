@@ -1,5 +1,7 @@
 #!/bin/bash
 
+export DOCKER_HOST=tcp://192.168.59.103:2375
+
 docker-ip() {
         boot2docker ip 2> /dev/null
 }
