@@ -17,3 +17,4 @@ add-user-dir-to-docker()
 }
 
 #echo $(docker-ip) dockerhost | sudo tee -a /etc/hosts
+export DOCKER_HOST=tcp://192.168.59.103:2375
