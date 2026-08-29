@@ -145,6 +145,7 @@ function zshreload() {
 export GOPATH="${GOPATH:-$HOME/workspace/go}"
 user_paths=(
   "$HOME/.local/bin"
+  "$HOME/.atuin/bin"
   "$HOME/.cargo/bin"
   "$HOME/.bun/bin"
   "$HOME/.pyenv/bin"
