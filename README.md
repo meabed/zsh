@@ -8,6 +8,9 @@ The configuration provides:
 
 - the `steeef` prompt;
 - Git and common Oh My Zsh aliases;
+- Docker and Docker Compose v2 aliases and completion;
+- guarded macOS, Homebrew, Debian, and systemd helpers;
+- colored man pages, archive extraction, and clipboard helpers;
 - Atuin global history search;
 - `fzf` shell widgets;
 - `zoxide` directory jumping;
@@ -129,6 +132,22 @@ The Oh My Zsh `uv` plugin generates current completions for both `uv` and
 | `uvv` | `uv venv` |
 
 Run `alias | grep '^uv'` to list every active alias.
+
+## Shell plugins
+
+The core plugin set works on macOS and Linux:
+
+- `docker` and `docker-compose` load when Docker exists. Compose aliases use
+  `docker compose` when the legacy `docker-compose` command is absent.
+- `colored-man-pages`, `extract`, `copyfile`, and `copypath` improve common
+  terminal tasks.
+- `sudo` makes `Esc Esc` add or remove `sudo` at the start of the command line.
+- `brew` and `macos` load only on supported machines.
+- `debian` and `systemd` load only on matching Linux systems.
+- `gh` and `kubectl` load only when their commands exist.
+
+The configuration does not load history, directory-jump, or fuzzy-search
+plugins that duplicate Atuin, zoxide, or fzf.
 
 ## Local values
 

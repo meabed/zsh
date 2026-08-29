@@ -87,6 +87,7 @@ for candidate in \
   /home/linuxbrew/.linuxbrew/share/antigen/antigen.zsh \
   /usr/share/zsh-antigen/antigen.zsh \
   /usr/share/zsh/plugins/antigen/antigen.zsh \
+  /usr/local/share/antigen/antigen.zsh \
   "$HOME/.local/share/antigen/antigen.zsh"; do
   if [[ -r "$candidate" ]]; then
     antigen_file="$candidate"
@@ -99,6 +100,16 @@ if [[ -z "$antigen_file" ]]; then
   print -u2 "Antigen is missing. Run this repository's install.sh again."
   return 1
 fi
+
+# Antigen tracks the ~/.zshrc symlink's timestamp. Compare its cache with the
+# real repository file so plugin changes take effect after `git pull`.
+antigen_cache_file="$HOME/.antigen/init.zsh"
+antigen_config_file="${${(%):-%N}:A}"
+if [[ -f "$antigen_cache_file" && "$antigen_config_file" -nt "$antigen_cache_file" ]]; then
+  rm -f "$antigen_cache_file"
+fi
+unset antigen_cache_file antigen_config_file
+
 source "$antigen_file"
 unset antigen_file
 
@@ -136,6 +147,7 @@ user_paths=(
   "$HOME/.local/bin"
   "$HOME/.cargo/bin"
   "$HOME/.bun/bin"
+  "$HOME/.pyenv/bin"
   "$GOPATH/bin"
   "$HOME/.antigravity/antigravity/bin"
   "$HOME/Library/Application Support/JetBrains/Toolbox/scripts"
@@ -208,14 +220,40 @@ zstyle ':omz:update' mode disabled
 zstyle ':omz:plugins:iterm2' shell-integration yes
 antigen use oh-my-zsh
 antigen bundles <<EOBUNDLES
+colored-man-pages
 common-aliases
+copyfile
+copypath
+extract
 history
 git
 iterm2
+sudo
 uv
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 EOBUNDLES
+
+# Load platform and tool plugins only where their commands can be useful.
+(( ${+commands[brew]} )) && antigen bundle brew
+
+case "$OSTYPE" in
+  darwin*)
+    antigen bundle macos
+    ;;
+  linux*)
+    [[ -r /etc/debian_version ]] && antigen bundle debian
+    (( ${+commands[systemctl]} )) && antigen bundle systemd
+    ;;
+esac
+
+if (( ${+commands[docker]} )); then
+  antigen bundle docker
+  antigen bundle docker-compose
+fi
+
+(( ${+commands[gh]} )) && antigen bundle gh
+(( ${+commands[kubectl]} )) && antigen bundle kubectl
 
 # Preserve the existing prompt.
 antigen theme steeef
@@ -290,9 +328,23 @@ if (( ${+commands[pyenv]} )); then
 fi
 
 if (( ${+commands[fzf]} )) && [[ -t 0 && -t 1 ]]; then
-  FZF_CTRL_R_COMMAND=
-  source <(fzf --zsh 2>/dev/null)
-  unset FZF_CTRL_R_COMMAND
+  if fzf --zsh >/dev/null 2>&1; then
+    FZF_CTRL_R_COMMAND=
+    source <(fzf --zsh)
+    unset FZF_CTRL_R_COMMAND
+  else
+    # Debian and Ubuntu releases may package fzf before `fzf --zsh` existed.
+    for fzf_script in \
+      /usr/share/doc/fzf/examples/key-bindings.zsh \
+      /usr/share/fzf/key-bindings.zsh \
+      /usr/share/fzf/shell/key-bindings.zsh \
+      /usr/share/doc/fzf/examples/completion.zsh \
+      /usr/share/fzf/completion.zsh \
+      /usr/share/fzf/shell/completion.zsh; do
+      [[ -r "$fzf_script" ]] && source "$fzf_script"
+    done
+    unset fzf_script
+  fi
 fi
 
 if (( ${+commands[zoxide]} )); then
