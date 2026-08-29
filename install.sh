@@ -2,10 +2,115 @@
 
 set -eu
 
+usage() {
+  printf 'Usage: %s [--packages]\n' "$0"
+  printf '  --packages  Install recommended macOS or Debian/Ubuntu tools first.\n'
+}
+
+install_packages=0
+case "${1:-}" in
+  '') ;;
+  --packages)
+    install_packages=1
+    shift
+    ;;
+  -h|--help)
+    usage
+    exit 0
+    ;;
+  *)
+    usage >&2
+    exit 2
+    ;;
+esac
+
+if [ "$#" -ne 0 ]; then
+  usage >&2
+  exit 2
+fi
+
+run_as_root() {
+  if [ "$(id -u)" -eq 0 ]; then
+    "$@"
+  elif command -v sudo >/dev/null 2>&1; then
+    sudo "$@"
+  else
+    printf 'error: sudo or a root shell is required to install system packages\n' >&2
+    return 1
+  fi
+}
+
+install_recommended_packages() {
+  export PATH="$HOME/.atuin/bin:$HOME/.local/bin:$HOME/.pyenv/bin:$PATH"
+
+  case "$(uname -s)" in
+    Darwin)
+      if ! command -v brew >/dev/null 2>&1; then
+        printf 'error: Homebrew is required for --packages on macOS\n' >&2
+        return 1
+      fi
+
+      printf 'scope: install recommended Homebrew formulae\n'
+      brew install \
+        antigen atuin btop curl fzf git htop jq ncdu pyenv ripgrep rsync \
+        tmux tree uv wget zoxide
+      ;;
+    Linux)
+      if ! command -v apt-get >/dev/null 2>&1; then
+        printf 'error: --packages currently supports Debian and Ubuntu Linux\n' >&2
+        return 1
+      fi
+
+      printf 'scope: install recommended Debian or Ubuntu packages\n'
+      run_as_root apt-get update
+      run_as_root env DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+        btop ca-certificates curl dnsutils fzf git htop jq less locales lsof \
+        ncdu ripgrep rsync tar time tmux tree unzip wget zip zsh
+
+      run_as_root localedef -i en_US -f UTF-8 en_US.UTF-8
+      run_as_root update-locale LANG=en_US.UTF-8
+
+      atuin_installer=$(curl --proto '=https' --tlsv1.2 -LsSf \
+        https://github.com/atuinsh/atuin/releases/latest/download/atuin-installer.sh)
+      printf '%s\n' "$atuin_installer" | ATUIN_NO_MODIFY_PATH=1 sh
+      unset atuin_installer
+
+      uv_installer=$(curl --proto '=https' --tlsv1.2 -LsSf \
+        https://astral.sh/uv/install.sh)
+      printf '%s\n' "$uv_installer" | UV_NO_MODIFY_PATH=1 sh
+      unset uv_installer
+
+      zoxide_installer=$(curl --proto '=https' --tlsv1.2 -LsSf \
+        https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh)
+      printf '%s\n' "$zoxide_installer" | sh
+      unset zoxide_installer
+
+      if [ -d "$HOME/.pyenv/.git" ]; then
+        git -C "$HOME/.pyenv" pull --ff-only
+      elif [ -e "$HOME/.pyenv" ]; then
+        printf 'error: %s exists but is not a Git checkout\n' "$HOME/.pyenv" >&2
+        return 1
+      else
+        git clone --depth=1 https://github.com/pyenv/pyenv.git "$HOME/.pyenv"
+      fi
+      ;;
+    *)
+      printf 'error: --packages supports macOS, Debian, and Ubuntu\n' >&2
+      return 1
+      ;;
+  esac
+
+  printf 'ok: recommended packages are installed\n'
+}
+
 repo_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd -P)
 source_file="$repo_dir/.zshrc"
 target_file="${ZDOTDIR:-$HOME}/.zshrc"
 antigen_dir="$HOME/.local/share/antigen"
+
+if [ "$install_packages" -eq 1 ]; then
+  install_recommended_packages
+fi
 
 printf 'scope: install %s as %s\n' "$source_file" "$target_file"
 

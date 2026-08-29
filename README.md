@@ -4,6 +4,9 @@ This repository contains one portable, hand-maintained [`.zshrc`](.zshrc).
 Antigen downloads current Oh My Zsh libraries and plugins at install time; the
 repository does not vendor an Oh My Zsh snapshot.
 
+For maintenance decisions, primary research, known failure modes, and the
+continuation checklist, read [`AGENTS.md`](AGENTS.md).
+
 The configuration provides:
 
 - the `steeef` prompt;
@@ -24,75 +27,70 @@ break shell startup.
 
 ## macOS
 
-macOS includes `/bin/zsh`, which is sufficient. Install Homebrew, then install
-the command-line tools:
+macOS includes `/bin/zsh`, which is sufficient. Install Homebrew, then run:
 
 ```sh
-brew install antigen atuin fzf pyenv uv zoxide
 git clone https://github.com/meabed/zsh.git ~/.config/zsh
-~/.config/zsh/install.sh
+~/.config/zsh/install.sh --packages
 chsh -s /bin/zsh
 exec /bin/zsh -l
 ```
+
+Package mode installs these Homebrew formulae:
+
+```text
+antigen atuin btop curl fzf git htop jq ncdu pyenv ripgrep rsync
+tmux tree uv wget zoxide
+```
+
+macOS already provides tools such as `dig`, `lsof`, `time`, `unzip`, and `zip`.
+Install Docker Desktop separately if you want the Docker integration.
 
 Do not install Oh My Zsh separately. Antigen installs it when the first shell
 starts.
 
 ## Debian and Ubuntu
 
-Install the required system packages:
+Install curl and Git so you can clone this repository:
 
 ```sh
 sudo apt-get update
-sudo apt-get install -y curl fzf git zsh
-```
-
-The installer uses a packaged Antigen installation when available. Otherwise,
-it clones Antigen into `~/.local/share/antigen`.
-
-Install the optional tools you want. The same Homebrew command works on Linux
-when Linuxbrew is available:
-
-```sh
-brew install atuin fzf pyenv uv zoxide
-```
-
-Without Linuxbrew, use each project's supported installation method:
-
-```sh
-curl --proto '=https' --tlsv1.2 -LsSf https://setup.atuin.sh |
-  sh -s -- --non-interactive
-curl -LsSf https://astral.sh/uv/install.sh | sh
-curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh |
-  sh
-```
-
-Review downloaded installers before executing them if the machine's security
-policy requires it. pyenv's Linux build dependencies and installer are
-documented at <https://github.com/pyenv/pyenv#installation>.
-
-Install the configuration last so another installer cannot replace it:
-
-```sh
+sudo apt-get install -y curl git
 git clone https://github.com/meabed/zsh.git ~/.config/zsh
-~/.config/zsh/install.sh
+~/.config/zsh/install.sh --packages
 chsh -s "$(command -v zsh)"
 exec zsh -l
 ```
+
+Package mode installs these Debian or Ubuntu packages:
+
+```text
+btop ca-certificates curl dnsutils fzf git htop jq less locales lsof
+ncdu ripgrep rsync tar time tmux tree unzip wget zip zsh
+```
+
+It also installs the latest Atuin, uv, and zoxide releases and tracks pyenv's
+`master` branch. Their installers do not append extra shell configuration.
+Antigen is cloned when no system installation exists.
+
+Review downloaded installers before executing them if the machine's security
+policy requires it.
 
 ## What the installer does
 
 `install.sh`:
 
-1. validates the repository's `.zshrc`;
-2. checks for Zsh and Git;
-3. finds Antigen or clones it when missing;
-4. backs up an existing `~/.zshrc`;
-5. links this repository's `.zshrc` to `~/.zshrc`;
-6. creates a private `~/.zsh_secrets` file when needed;
-7. reports missing optional tools without installing them.
+1. optionally installs recommended tools with `--packages`;
+2. validates the repository's `.zshrc`;
+3. checks for Zsh and Git;
+4. finds Antigen or clones it when missing;
+5. backs up an existing `~/.zshrc`;
+6. links this repository's `.zshrc` to `~/.zshrc`;
+7. creates a private `~/.zsh_secrets` file when needed;
+8. reports any missing optional shell tools.
 
-It does not change the login shell or install system packages.
+Without `--packages`, it changes no system packages. It never changes the login
+shell automatically.
 
 ## History and navigation
 
@@ -166,13 +164,14 @@ Update this configuration and its plugins deliberately:
 
 ```sh
 git -C ~/.config/zsh pull --ff-only
+~/.config/zsh/install.sh --packages
 antigen update
 ```
 
-Update optional Homebrew packages separately:
+To update every Homebrew package instead, use:
 
 ```sh
-brew upgrade atuin fzf pyenv uv zoxide
+brew upgrade
 ```
 
 Useful commands defined by the configuration:

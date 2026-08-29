@@ -7,17 +7,13 @@
 # This is the only hand-maintained interactive-shell configuration. The
 # installer links it to ~/.zshrc. Keep credentials in ~/.zsh_secrets.
 #
-# Quick install:
-#   macOS:
-#     brew install antigen atuin fzf pyenv uv zoxide
-#   Debian or Ubuntu:
-#     sudo apt-get update
-#     sudo apt-get install -y curl fzf git zsh
-#
-#   Then, on either platform:
+# Quick install after Homebrew on macOS or curl + Git on Linux:
 #     git clone https://github.com/meabed/zsh.git ~/.config/zsh
-#     ~/.config/zsh/install.sh
+#     ~/.config/zsh/install.sh --packages
 #     exec zsh -l
+#
+# Use install.sh without --packages to install only the shell configuration.
+# See README.md for complete package lists and manual commands.
 #
 # Antigen installs Oh My Zsh and every bundle declared below. Do not also run
 # the standard Oh My Zsh installer or clone individual plugins.
@@ -43,7 +39,7 @@
 #   ~/.zsh_secrets        Private values. Keep mode 600.
 #   ~/.zsh_history        Native fallback history.
 #   ~/.antigen/           Antigen bundles and completion cache.
-#   ~/.zsh/cache/         Zsh completion data cache.
+#   ~/.cache/zsh/         Zsh and Oh My Zsh completion caches.
 #   ~/.config/atuin/      Atuin-generated configuration.
 #   ~/.local/share/atuin/ Atuin history database.
 #   ~/.zshrc.zwc          Antigen-generated compiled configuration.
@@ -67,6 +63,12 @@
 # Keep PATH and fpath duplicate-free as tools add entries.
 typeset -U path PATH
 typeset -U fpath FPATH
+
+# Antigen does not create the directory required by generated OMZ completions.
+ZSH_CACHE_DIR="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"
+ANTIGEN_COMPDUMP="$ZSH_CACHE_DIR/.zcompdump"
+mkdir -p "$ZSH_CACHE_DIR/completions"
+fpath=("$ZSH_CACHE_DIR/completions" $fpath)
 
 # Find Homebrew when a terminal starts without its shell environment.
 if (( ! ${+commands[brew]} )); then
@@ -205,7 +207,7 @@ unset gcloud_root
 zstyle ':completion:*' menu select
 zstyle ':completion:*' completer _complete
 zstyle ':completion:*' use-cache true
-zstyle ':completion:*' cache-path "$HOME/.zsh/cache"
+zstyle ':completion:*' cache-path "$ZSH_CACHE_DIR/completion-cache"
 zstyle ':completion:*' group-name ''
 zstyle ':completion:*' matcher-list 'm:{a-zA-Z}={A-Za-z}'
 zstyle ':completion:*:descriptions' format '- %d -'
@@ -230,7 +232,6 @@ history
 git
 iterm2
 sudo
-uv
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 EOBUNDLES
@@ -247,14 +248,6 @@ case "$OSTYPE" in
     (( ${+commands[systemctl]} )) && antigen bundle systemd
     ;;
 esac
-
-if (( ${+commands[docker]} )); then
-  antigen bundle docker
-  antigen bundle docker-compose
-fi
-
-(( ${+commands[gh]} )) && antigen bundle gh
-(( ${+commands[kubectl]} )) && antigen bundle kubectl
 
 # Preserve the existing prompt.
 antigen theme steeef
@@ -280,6 +273,20 @@ if [[ -n "$gcloud_completion_file" ]]; then
   source "$gcloud_completion_file"
 fi
 unset gcloud_completion_file
+
+# Antigen loads bundles before compinit. Load plugins that generate completion
+# files afterwards so compinit never scans their temporary files.
+omz_late_plugins=()
+(( ${+commands[uv]} )) && omz_late_plugins+=(uv)
+(( ${+commands[docker]} )) && omz_late_plugins+=(docker docker-compose)
+(( ${+commands[gh]} )) && omz_late_plugins+=(gh)
+(( ${+commands[kubectl]} )) && omz_late_plugins+=(kubectl)
+
+for omz_plugin in "${omz_late_plugins[@]}"; do
+  omz_plugin_file="$ZSH/plugins/$omz_plugin/$omz_plugin.plugin.zsh"
+  [[ -r "$omz_plugin_file" ]] && source "$omz_plugin_file"
+done
+unset omz_late_plugins omz_plugin omz_plugin_file
 
 # Native history remains a fallback; Atuin owns interactive search.
 HISTFILE="$HOME/.zsh_history"
