@@ -94,7 +94,7 @@ shell automatically.
 
 ## History and navigation
 
-- **Up arrow:** global prefix history search.
+- **Up arrow:** global substring history search, matching anywhere in a command.
 - **Ctrl-R:** global fuzzy history search.
 - **Ctrl-R again inside Atuin:** cycle its enabled filters, including directory
   history.
@@ -102,6 +102,10 @@ shell automatically.
 - **Alt-C:** choose a directory with `fzf`.
 - **z query:** jump to a frequently used directory with `zoxide`.
 - **zi:** choose a known directory interactively.
+
+For example, type `clone-` and press Up to find commands containing `clone-`,
+even in the middle of an argument or path. This uses Atuin's
+[`fulltext` search mode](https://docs.atuin.sh/latest/guide/advanced-usage/#search-mode).
 
 Import an existing Zsh history once:
 

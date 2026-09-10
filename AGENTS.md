@@ -42,8 +42,8 @@ an external dependency update that requires explicit validation.
   directory-jump owners. Do not add overlapping history-substring, fuzzy
   search, or directory-jump plugins.
 - Keep credentials and machine-specific values out of tracked files.
-- The remote currently has exactly four reachable commits by explicit owner
-  request. Do not rewrite or force-push history unless the current task
+- The 2026-08-30 history cleanup retained four reachable commits by explicit
+  owner request. Do not rewrite or force-push history unless the current task
   explicitly authorizes it. If a future authorized change must preserve that
   count, amend the tip and use `--force-with-lease` against a freshly verified
   remote SHA.
@@ -199,7 +199,8 @@ Ordering is part of the design. Preserve this sequence:
    [upstream](https://github.com/junegunn/fzf#setting-up-shell-integration).
 9. Rebind Atuin last. fzf also owns `Ctrl-R`, so the final block restores
    Atuin's widgets for `Ctrl-R`, vi `/`, and both common up-arrow escape
-   sequences. Up-arrow remains global prefix search; `Ctrl-R` remains global
+   sequences. Up-arrow uses global substring search (`--search-mode fulltext`)
+   so text also matches in the middle of commands; `Ctrl-R` remains global
    fuzzy search. Atuin documents its Zsh widgets and custom binding model in
    the [key-binding guide](https://docs.atuin.sh/main/configuration/key-binding/).
 
@@ -270,6 +271,12 @@ Atuin safeguards are part of the contract:
 8. fzf widgets were absent on older Debian/Ubuntu releases.
    - Cause: packaged fzf predated `fzf --zsh`.
    - Fix: probe the flag, then source packaged key-binding/completion scripts.
+9. Up-arrow missed text in the middle of commands, such as `clone-`.
+   - Cause: the binding explicitly selected `prefix`, which only matches the
+     beginning of a command.
+   - Fix: select `fulltext` for global substring matching. Validate with
+     synthetic history in an isolated Atuin data directory: matches at both
+     the beginning and middle must appear, while unrelated commands must not.
 
 Do not encode one machine's history-cleanup script in this repository. History
 formats and database schemas can change; inspect the backup and current Atuin

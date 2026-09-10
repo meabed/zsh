@@ -30,7 +30,7 @@
 #
 # History:
 #   Ctrl-R     Global fuzzy search.
-#   Up arrow   Global prefix search.
+#   Up arrow   Global substring search (matches anywhere in the command).
 #   Ctrl-R again inside Atuin cycles its enabled history filters.
 #   Import an existing native history once:
 #     HISTFILE="$HOME/.zsh_history" atuin import zsh
@@ -360,10 +360,10 @@ if (( ${+commands[zoxide]} )); then
 fi
 
 # Reassert Atuin bindings after Oh My Zsh and fzf have registered theirs.
-# Up uses global prefix search; Ctrl-R uses global fuzzy search.
+# Up matches a substring anywhere in the command; Ctrl-R uses global fuzzy search.
 if (( ${+commands[atuin]} )); then
   function _atuin_global_up_search() {
-    _atuin_up_search --filter-mode global --search-mode prefix --inline-height 30
+    _atuin_up_search --filter-mode global --search-mode fulltext --inline-height 30
   }
   zle -N atuin-global-up-search _atuin_global_up_search
   bindkey -M emacs '^R' atuin-search
