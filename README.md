@@ -100,10 +100,9 @@ shell automatically.
   history.
 - **Enter or Tab inside Atuin:** return the selected command to the prompt for
   editing. Press Enter at the prompt when you are ready to run it.
-- **Tab at the prompt:** insert the first completion and open a selection menu
-  when there are multiple choices. Tab and Shift-Tab cycle through matches;
-  arrow keys move around the menu. Enter accepts the match and leaves the
-  command editable. Press Enter again to run it.
+- **Enter inside a Zsh completion menu:** accept the selected match and leave
+  the command editable. Press Enter at the prompt to run it. Tab keeps its
+  existing completion behavior.
 - **Ctrl-T:** choose a file with `fzf`.
 - **Alt-C:** choose a directory with `fzf`.
 - **z query:** jump to a frequently used directory with `zoxide`.
@@ -122,10 +121,8 @@ atuin config set enter_accept false
 This saves [`enter_accept = false`](https://docs.atuin.sh/latest/configuration/config/#enter_accept)
 in Atuin's local configuration.
 
-Zsh's [`MENU_COMPLETE` option](https://zsh.sourceforge.io/Doc/Release/Options.html#Completion-4)
-selects completion matches immediately. Its
-[menu selection](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html#The-zsh_002fcomplist-Module)
-keeps accepting a match separate from executing the command.
+Zsh's [menu selection](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html#The-zsh_002fcomplist-Module)
+accepts a match without submitting the command line.
 
 Import an existing Zsh history once:
 

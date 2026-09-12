@@ -197,11 +197,10 @@ Ordering is part of the design. Preserve this sequence:
    Debian/Ubuntu fzf releases lack that flag. The current fzf integration and
    default `Ctrl-R`, `Ctrl-T`, and `Alt-C` widgets are documented
    [upstream](https://github.com/junegunn/fzf#setting-up-shell-integration).
-   Set `menu_complete` after Oh My Zsh, which disables it during startup.
-   Combined with the existing `menu select` style, Tab inserts and cycles
-   completion matches immediately. Keep the native `menuselect` arrow keys,
-   Shift-Tab reverse cycling, and Enter behavior: accept the match without
-   submitting the command line. See the Zsh
+   Preserve `auto_menu` and the existing `menu select` style; do not enable
+   `menu_complete` or change when Tab starts selecting matches. Keep native
+   `menuselect` arrow keys, Shift-Tab reverse cycling, and Enter behavior:
+   accept the match without submitting the command line. See the Zsh
    [completion options](https://zsh.sourceforge.io/Doc/Release/Options.html#Completion-4)
    and [menu selection reference](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html#The-zsh_002fcomplist-Module).
 9. Rebind Atuin last. fzf also owns `Ctrl-R`, so the final block restores
@@ -344,8 +343,9 @@ do not use it during a read-only review. Acceptance requires:
   and directory widgets;
 - with isolated synthetic history, Enter and Tab inside Atuin return the
   selection for editing, and only Enter at the prompt executes it;
-- Tab immediately selects a completion, Tab/Shift-Tab and both common arrow
-  escape sequences navigate its menu, and Enter accepts without executing;
+- Tab keeps its existing completion behavior; inside a selection menu,
+  Tab/Shift-Tab and both common arrow escape sequences navigate matches,
+  and Enter accepts without executing;
 - Atuin diagnostics pass, and any history migration has a backup, valid store,
   zero malformed date tails, and zero `_style=''` command records; and
 - warm startup shows no material regression against a before-change baseline.
