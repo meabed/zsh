@@ -197,6 +197,13 @@ Ordering is part of the design. Preserve this sequence:
    Debian/Ubuntu fzf releases lack that flag. The current fzf integration and
    default `Ctrl-R`, `Ctrl-T`, and `Alt-C` widgets are documented
    [upstream](https://github.com/junegunn/fzf#setting-up-shell-integration).
+   Set `menu_complete` after Oh My Zsh, which disables it during startup.
+   Combined with the existing `menu select` style, Tab inserts and cycles
+   completion matches immediately. Keep the native `menuselect` arrow keys,
+   Shift-Tab reverse cycling, and Enter behavior: accept the match without
+   submitting the command line. See the Zsh
+   [completion options](https://zsh.sourceforge.io/Doc/Release/Options.html#Completion-4)
+   and [menu selection reference](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html#The-zsh_002fcomplist-Module).
 9. Rebind Atuin last. fzf also owns `Ctrl-R`, so the final block restores
    Atuin's widgets for `Ctrl-R`, vi `/`, and both common up-arrow escape
    sequences. Up-arrow uses global substring search (`--search-mode fulltext`)
@@ -218,6 +225,16 @@ execution. These options are defined in the
 Atuin safeguards are part of the contract:
 
 - Keep `--disable-ai` and `ATUIN_LOG=error` in shell initialization.
+- Configure `enter_accept = false` once with
+  `atuin config set enter_accept false`, as documented in `README.md`. Enter
+  and Tab should return the selection to the editable prompt; a subsequent
+  Enter at the prompt runs it. Keep this preference in Atuin's local config,
+  and do not rewrite that file during shell startup. Atuin defines the
+  [`enter_accept` behavior](https://docs.atuin.sh/latest/configuration/config/#enter_accept)
+  in its docs. Version 18.22.0 loads the config file after environment
+  variables in its
+  [settings loader](https://github.com/atuinsh/atuin/blob/v18.22.0/crates/atuin-client/src/settings.rs),
+  so `ATUIN_ENTER_ACCEPT=false` cannot override an existing saved `true` value.
 - A leading space excludes a one-off command from both native history and
   Atuin. Keep Atuin's default secret filter enabled, but treat it only as a
   safety net; add local `history_filter` or `cwd_filter` rules for sensitive
@@ -325,6 +342,10 @@ do not use it during a read-only review. Acceptance requires:
 - the prompt and right prompt exactly match section 2;
 - Atuin owns final `Ctrl-R` and up-arrow bindings while fzf retains its file
   and directory widgets;
+- with isolated synthetic history, Enter and Tab inside Atuin return the
+  selection for editing, and only Enter at the prompt executes it;
+- Tab immediately selects a completion, Tab/Shift-Tab and both common arrow
+  escape sequences navigate its menu, and Enter accepts without executing;
 - Atuin diagnostics pass, and any history migration has a backup, valid store,
   zero malformed date tails, and zero `_style=''` command records; and
 - warm startup shows no material regression against a before-change baseline.

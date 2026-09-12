@@ -32,6 +32,7 @@
 #   Ctrl-R     Global fuzzy search.
 #   Up arrow   Global substring search (matches anywhere in the command).
 #   Ctrl-R again inside Atuin cycles its enabled history filters.
+#   Make Enter select for editing: atuin config set enter_accept false
 #   Import an existing native history once:
 #     HISTFILE="$HOME/.zsh_history" atuin import zsh
 #
@@ -314,7 +315,7 @@ setopt auto_remove_slash      # Remove an automatically added trailing slash whe
 setopt extended_glob          # Enable Zsh's extended glob operators and qualifiers.
 setopt glob_dots              # Include dotfiles in wildcard matches.
 setopt auto_list              # List choices when completion is ambiguous.
-setopt auto_menu              # Start menu selection after repeated completion.
+setopt menu_complete          # Select the first completion; Tab cycles through choices.
 setopt complete_aliases       # Complete aliases without expanding them first.
 setopt always_to_end          # Move the cursor to the end after inserting a completion.
 setopt complete_in_word       # Complete from the cursor instead of only at the word's end.

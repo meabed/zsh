@@ -98,6 +98,12 @@ shell automatically.
 - **Ctrl-R:** global fuzzy history search.
 - **Ctrl-R again inside Atuin:** cycle its enabled filters, including directory
   history.
+- **Enter or Tab inside Atuin:** return the selected command to the prompt for
+  editing. Press Enter at the prompt when you are ready to run it.
+- **Tab at the prompt:** insert the first completion and open a selection menu
+  when there are multiple choices. Tab and Shift-Tab cycle through matches;
+  arrow keys move around the menu. Enter accepts the match and leaves the
+  command editable. Press Enter again to run it.
 - **Ctrl-T:** choose a file with `fzf`.
 - **Alt-C:** choose a directory with `fzf`.
 - **z query:** jump to a frequently used directory with `zoxide`.
@@ -106,6 +112,20 @@ shell automatically.
 For example, type `clone-` and press Up to find commands containing `clone-`,
 even in the middle of an argument or path. This uses Atuin's
 [`fulltext` search mode](https://docs.atuin.sh/latest/guide/advanced-usage/#search-mode).
+
+Set Atuin's Enter behavior once, including on each new machine:
+
+```sh
+atuin config set enter_accept false
+```
+
+This saves [`enter_accept = false`](https://docs.atuin.sh/latest/configuration/config/#enter_accept)
+in Atuin's local configuration.
+
+Zsh's [`MENU_COMPLETE` option](https://zsh.sourceforge.io/Doc/Release/Options.html#Completion-4)
+selects completion matches immediately. Its
+[menu selection](https://zsh.sourceforge.io/Doc/Release/Zsh-Modules.html#The-zsh_002fcomplist-Module)
+keeps accepting a match separate from executing the command.
 
 Import an existing Zsh history once:
 
