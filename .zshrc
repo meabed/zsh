@@ -323,7 +323,7 @@ setopt list_ambiguous         # Show candidates when completion remains ambiguou
 setopt rm_star_silent         # Do not add Zsh's extra prompt for rm with a wildcard.
 unsetopt beep                 # Disable the terminal bell for shell errors.
 unsetopt bg_nice              # Keep background jobs at their requested priority.
-unsetopt clobber              # Require >| before truncating an existing file.
+setopt clobber                # Allow > to truncate existing files (the default).
 unsetopt hist_beep            # Disable the terminal bell for missing history matches.
 unsetopt hup                  # Leave explicitly backgrounded jobs running when the shell exits.
 unsetopt ignore_eof           # Allow Ctrl-D to exit the shell.
