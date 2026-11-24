@@ -324,6 +324,7 @@ setopt rm_star_silent         # Do not add Zsh's extra prompt for rm with a wild
 unsetopt beep                 # Disable the terminal bell for shell errors.
 unsetopt bg_nice              # Keep background jobs at their requested priority.
 setopt clobber                # Allow > to truncate existing files (the default).
+setopt sh_word_split          # Split unquoted $var on spaces like sh/bash, so `cmd $paths` passes each path.
 unsetopt hist_beep            # Disable the terminal bell for missing history matches.
 unsetopt hup                  # Leave explicitly backgrounded jobs running when the shell exits.
 unsetopt ignore_eof           # Allow Ctrl-D to exit the shell.
